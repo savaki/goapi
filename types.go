@@ -1,5 +1,11 @@
 package goapi
 
+import "time"
+
+const (
+	TimeFormat = "2006-01-02T15:04:05"
+)
+
 type Agent struct {
 	Sandbox      string   `json:"sandbox"`
 	Os           string   `json:"os"`
@@ -80,12 +86,16 @@ type PipelineGroup struct {
 }
 
 type Project struct {
-	Name            string `xml:"name,attr"`
-	Activity        string `xml:"activity,attr"`
-	LastBuildStatus string `xml:"lastBuildStatus,attr"`
-	LastBuildLabel  string `xml:"lastBuildLabel,attr"`
-	LastBuildTime   string `xml:"lastBuildTime,attr"`
-	WebUrl          string `xml:"webUrl,attr"`
+	Name                string `xml:"name,attr"`
+	Activity            string `xml:"activity,attr"`
+	LastBuildStatus     string `xml:"lastBuildStatus,attr"`
+	LastBuildLabel      string `xml:"lastBuildLabel,attr"`
+	LastBuildTimeString string `xml:"lastBuildTime,attr"`
+	WebUrl              string `xml:"webUrl,attr"`
+}
+
+func (p Project) LastBuildTime() (time.Time, error) {
+	return time.Parse(TimeFormat, p.LastBuildTimeString)
 }
 
 type CCTray struct {

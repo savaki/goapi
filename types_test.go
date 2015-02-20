@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"strings"
 	"testing"
+	"time"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -35,8 +36,17 @@ func TestCCTray(t *testing.T) {
 				So(project.Activity, ShouldEqual, "Sleeping")
 				So(project.LastBuildStatus, ShouldEqual, "Success")
 				So(project.LastBuildLabel, ShouldEqual, "4")
-				So(project.LastBuildTime, ShouldEqual, "2015-02-20T10:13:09")
+				So(project.LastBuildTimeString, ShouldEqual, "2015-02-20T10:13:09")
 				So(project.WebUrl, ShouldEqual, "http://192.168.99.101:8153/go/pipelines/First-Pipeline/4/defaultStage/1")
+
+				buildTime, err := project.LastBuildTime()
+				So(err, ShouldBeNil)
+				So(buildTime.Year(), ShouldEqual, 2015)
+				So(buildTime.Month(), ShouldEqual, time.February)
+				So(buildTime.Day(), ShouldEqual, 20)
+				So(buildTime.Hour(), ShouldEqual, 10)
+				So(buildTime.Minute(), ShouldEqual, 13)
+				So(buildTime.Second(), ShouldEqual, 9)
 			})
 		})
 	})
