@@ -1,6 +1,9 @@
 package goapi
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 const (
 	TimeFormat = "2006-01-02T15:04:05"
@@ -42,6 +45,13 @@ type Job struct {
 	Id                  int                  `json:"id"`
 	StageCounter        string               `json:"stage_counter,omitempty"`
 	StageName           string               `json:"stage_name,omitempty"`
+	Rerun               bool                 `json:"rerun"`
+	PipelineName        string               `json:"pipeline_name"`
+}
+
+type JobHistory struct {
+	Jobs       []Job      `json:"jobs"`
+	Pagination Pagination `json:"pagination"`
 }
 
 type Stage struct {
@@ -94,10 +104,42 @@ type Project struct {
 	WebUrl              string `xml:"webUrl,attr"`
 }
 
+type Artifact struct {
+}
+
 func (p Project) LastBuildTime() (time.Time, error) {
 	return time.Parse(TimeFormat, p.LastBuildTimeString)
 }
 
 type CCTray struct {
 	Projects []Project `xml:"Project"`
+}
+
+// --------------------------------------------------------
+
+type Variable struct {
+	Name  string `xml:"name,attr"`
+	Value string `xml:",chardata"`
+}
+
+type Link struct {
+	Rel  string `xml:"rel,attr"`
+	Href string `xml:"href,attr"`
+}
+
+type ScheduledJob struct {
+	Id                   string     `xml:"id,attr"`
+	Name                 string     `xml:"name,attr"`
+	Link                 Link       `xml:"link"`
+	BuildLocator         string     `xml:"buildLocator"`
+	Resources            []string   `xml:"resources>resource"`
+	Environment          string     `xml:"environment"`
+	EnvironmentVariables []Variable `xml:"environmentVariables>variable,omitempty"`
+}
+
+func (s ScheduledJob) Trim() ScheduledJob {
+	s.BuildLocator = strings.TrimSpace(s.BuildLocator)
+	s.Environment = strings.TrimSpace(s.Environment)
+
+	return s
 }
