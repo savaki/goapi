@@ -16,6 +16,13 @@ var flags = []cli.Flag{
 	cli.StringFlag{"url", "http://localhost:8153", "Go CD server codebase", "GOCD_URL"},
 }
 
+var (
+	flagPipelineName = cli.StringFlag{"pipeline", "", "the name of the pipeline", "GOCD_PIPELINE"}
+	flagStageName    = cli.StringFlag{"stage", "", "the name of the stage", "GOCD_STAGE"}
+	flagAgentUuid    = cli.StringFlag{"agent-uuid", "", "the uuid of the agent", "GOCD_AGENT_UUID"}
+	flagOffset       = cli.IntFlag{"offset", 0, "the offset for pagination", "GOCD_OFFSET"}
+)
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "gocd"
@@ -26,6 +33,7 @@ func main() {
 		pipeline,
 		pipelineGroups,
 		stage,
+		build,
 	}
 	app.Run(os.Args)
 }

@@ -26,28 +26,28 @@ type JobStateTransition struct {
 }
 
 type Job struct {
-	AgentUuid           string               `json:"agent_uuid"`
+	AgentUuid           string               `json:"agent_uuid,omitempty"`
 	Name                string               `json:"name"`
 	JobStateTransitions []JobStateTransition `json:"job_state_transitions"`
 	ScheduledDate       int64                `json:"scheduled_date"`
-	PipelineCounter     int                  `json:"pipeline_counter"`
+	PipelineCounter     int                  `json:"pipeline_counter,omitempty"`
 	Result              string               `json:"result"`
 	State               string               `json:"state"`
 	Id                  int                  `json:"id"`
-	StageCounter        string               `json:"stage_counter"`
-	StageName           string               `json:"stage_name"`
+	StageCounter        string               `json:"stage_counter,omitempty"`
+	StageName           string               `json:"stage_name,omitempty"`
 }
 
 type Stage struct {
 	Name            string `json:"name"`
-	ApprovedBy      string `json:"approved_by"`
-	Jobs            []Job  `json:"jobs"`
-	PipelineCounter int    `json:"pipeline_counter"`
-	PipelineName    string `json:"pipeline_name"`
-	ApprovalType    string `json:"approval_type"`
-	Result          string `json:"result"`
-	Id              int    `json:"id"`
-	Counter         string `json:"counter"`
+	ApprovedBy      string `json:"approved_by,omitempty"`
+	Jobs            []Job  `json:"jobs,omitempty"`
+	PipelineCounter int    `json:"pipeline_counter,omitempty"`
+	PipelineName    string `json:"pipeline_name,omitempty"`
+	ApprovalType    string `json:"approval_type,omitempty"`
+	Result          string `json:"result,omitempty"`
+	Id              int    `json:"id,omitempty"`
+	Counter         string `json:"counter,omitempty"`
 }
 
 type Material struct {
@@ -57,13 +57,37 @@ type Material struct {
 }
 
 type Pipeline struct {
-	Stages    []Stage    `json:"stages"`
+	Stages    []Stage    `json:"stages,omitempty"`
 	Name      string     `json:"name"`
-	Materials []Material `json:"materials"`
+	Materials []Material `json:"materials,omitempty"`
 	Label     string     `json:"label"`
+}
+
+type PipelineStatus struct {
+	Locked      bool `json:"locked"`
+	Paused      bool `json:"paused"`
+	Schedulable bool `json:"schedulable"`
+}
+
+type PipelineHistory struct {
+	Pipelines  []Pipeline `json:"pipelines"`
+	Pagination Pagination `json:"pagination"`
 }
 
 type PipelineGroup struct {
 	Pipelines []Pipeline `json:"pipelines"`
 	Name      string     `json:"name"`
+}
+
+type Project struct {
+	Name            string `xml:"name,attr"`
+	Activity        string `xml:"activity,attr"`
+	LastBuildStatus string `xml:"lastBuildStatus,attr"`
+	LastBuildLabel  string `xml:"lastBuildLabel,attr"`
+	LastBuildTime   string `xml:"lastBuildTime,attr"`
+	WebUrl          string `xml:"webUrl,attr"`
+}
+
+type CCTray struct {
+	Projects []Project `xml:"Project"`
 }

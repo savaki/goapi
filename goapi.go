@@ -45,3 +45,8 @@ func (c *Client) pathTo(format string, args ...interface{}) string {
 	path := fmt.Sprintf(format, args...)
 	return c.codebase + "/go/api" + path
 }
+
+func (c *Client) rawPathTo(format string, args ...interface{}) string {
+	path := fmt.Sprintf(format, args...)
+	return c.codebase + path
+}

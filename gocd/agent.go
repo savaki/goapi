@@ -2,8 +2,6 @@ package main
 
 import "github.com/codegangsta/cli"
 
-var flagAgentUuid = cli.StringFlag{"agent-uuid", "", "the uuid of the agent", "GOCD_AGENT_UUID"}
-
 var agent = cli.Command{
 	Name:  "agent",
 	Usage: "commands for agents",
