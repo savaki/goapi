@@ -26,7 +26,7 @@ func TestProjectFilter(t *testing.T) {
 		// #MatchStatus --------------------------------------------------------
 
 		Convey("When I call #MatchStatus with no #Status defined", func() {
-			match = filter.MatchStatus(project)
+			match = filter.matchStatus(project)
 
 			Convey("Then I expect a match", func() {
 				So(match, ShouldBeTrue)
@@ -35,7 +35,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #MatchStatus with a matching #Status defined", func() {
 			filter.Status = []string{project.LastBuildStatus}
-			match = filter.MatchStatus(project)
+			match = filter.matchStatus(project)
 
 			Convey("Then I expect a match", func() {
 				So(match, ShouldBeTrue)
@@ -44,7 +44,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #MatchStatus with a NON-matching #Status defined", func() {
 			filter.Status = []string{project.LastBuildStatus + "blah"}
-			match = filter.MatchStatus(project)
+			match = filter.matchStatus(project)
 
 			Convey("Then I expect NO match", func() {
 				So(match, ShouldBeFalse)
@@ -54,7 +54,7 @@ func TestProjectFilter(t *testing.T) {
 		// #MatchActivity ------------------------------------------------------
 
 		Convey("When I call #MatchActivity with no #Activity defined", func() {
-			match = filter.MatchActivity(project)
+			match = filter.matchActivity(project)
 
 			Convey("Then I expect a match", func() {
 				So(match, ShouldBeTrue)
@@ -63,7 +63,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #MatchActivity with a matching #Activity defined", func() {
 			filter.Activity = []string{project.Activity}
-			match = filter.MatchActivity(project)
+			match = filter.matchActivity(project)
 
 			Convey("Then I expect a match", func() {
 				So(match, ShouldBeTrue)
@@ -72,7 +72,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #MatchActivity with a NON-matching #Activity defined", func() {
 			filter.Activity = []string{project.Activity + "blah"}
-			match = filter.MatchActivity(project)
+			match = filter.matchActivity(project)
 
 			Convey("Then I expect NO match", func() {
 				So(match, ShouldBeFalse)
@@ -82,7 +82,7 @@ func TestProjectFilter(t *testing.T) {
 		// #MatchWithin --------------------------------------------------------
 
 		Convey("When I call #MatchWithin with no #Within defined", func() {
-			match = filter.MatchWithin(project)
+			match = filter.matchWithin(project)
 
 			Convey("Then I expect a match", func() {
 				So(match, ShouldBeTrue)
@@ -91,7 +91,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #MatchWithin with a matching #Within defined", func() {
 			filter.Within = time.Hour * 24 * 365
-			match = filter.MatchWithin(project)
+			match = filter.matchWithin(project)
 
 			Convey("Then I expect a match", func() {
 				So(match, ShouldBeTrue)
@@ -100,7 +100,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #MatchWithin with a NON-matching #Within defined", func() {
 			filter.Within = time.Hour
-			match = filter.MatchWithin(project)
+			match = filter.matchWithin(project)
 
 			Convey("Then I expect NO match", func() {
 				So(match, ShouldBeFalse)
@@ -110,7 +110,7 @@ func TestProjectFilter(t *testing.T) {
 		// #MatchName --------------------------------------------------------
 
 		Convey("When I call #MatchName with no #Name defined", func() {
-			match = filter.MatchName(project)
+			match = filter.matchName(project)
 
 			Convey("Then I expect a match", func() {
 				So(match, ShouldBeTrue)
@@ -119,7 +119,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #MatchName with a matching #Name defined", func() {
 			filter.Name = regexp.MustCompile(`\S`)
-			match = filter.MatchName(project)
+			match = filter.matchName(project)
 
 			Convey("Then I expect a match", func() {
 				So(match, ShouldBeTrue)
@@ -128,7 +128,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #MatchName with a NON-matching #Name defined", func() {
 			filter.Name = regexp.MustCompile(`this-wont-match`)
-			match = filter.MatchName(project)
+			match = filter.matchName(project)
 
 			Convey("Then I expect NO match", func() {
 				So(match, ShouldBeFalse)

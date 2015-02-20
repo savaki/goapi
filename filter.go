@@ -12,7 +12,7 @@ type ProjectFilter struct {
 	Name     *regexp.Regexp
 }
 
-func (filter ProjectFilter) MatchWithin(project Project) bool {
+func (filter ProjectFilter) matchWithin(project Project) bool {
 	if filter.Within == 0 {
 		return true
 	}
@@ -25,7 +25,7 @@ func (filter ProjectFilter) MatchWithin(project Project) bool {
 	return buildTime.Add(filter.Within).Before(time.Now()) == false
 }
 
-func (filter ProjectFilter) MatchActivity(project Project) bool {
+func (filter ProjectFilter) matchActivity(project Project) bool {
 	if filter.Activity == nil {
 		return true
 	}
@@ -39,7 +39,7 @@ func (filter ProjectFilter) MatchActivity(project Project) bool {
 	return false
 }
 
-func (filter ProjectFilter) MatchStatus(project Project) bool {
+func (filter ProjectFilter) matchStatus(project Project) bool {
 	if filter.Status == nil {
 		return true
 	}
@@ -53,7 +53,7 @@ func (filter ProjectFilter) MatchStatus(project Project) bool {
 	return false
 }
 
-func (filter ProjectFilter) MatchName(project Project) bool {
+func (filter ProjectFilter) matchName(project Project) bool {
 	if filter.Name == nil {
 		return true
 	}
@@ -62,19 +62,19 @@ func (filter ProjectFilter) MatchName(project Project) bool {
 }
 
 func (filter ProjectFilter) Match(project Project) bool {
-	if !filter.MatchWithin(project) {
+	if !filter.matchWithin(project) {
 		return false
 	}
 
-	if !filter.MatchStatus(project) {
+	if !filter.matchStatus(project) {
 		return false
 	}
 
-	if !filter.MatchName(project) {
+	if !filter.matchName(project) {
 		return false
 	}
 
-	if !filter.MatchActivity(project) {
+	if !filter.matchActivity(project) {
 		return false
 	}
 
@@ -86,7 +86,7 @@ func (filter ProjectFilter) Filter(projects []Project) []Project {
 
 	if projects != nil {
 		for _, project := range projects {
-			if filter.MatchWithin(project) {
+			if filter.matchWithin(project) {
 				projects = append(projects, project)
 			}
 		}
