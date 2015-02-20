@@ -52,6 +52,34 @@ func TestProjectCriteria(t *testing.T) {
 			})
 		})
 
+		// #MatchActivity ------------------------------------------------------
+
+		Convey("When I call #MatchActivity with no #Activity defined", func() {
+			match = filter.MatchActivity(project)
+
+			Convey("Then I expect a match", func() {
+				So(match, ShouldBeTrue)
+			})
+		})
+
+		Convey("When I call #MatchActivity with a matching #Activity defined", func() {
+			filter.Activity = []string{project.Activity}
+			match = filter.MatchActivity(project)
+
+			Convey("Then I expect a match", func() {
+				So(match, ShouldBeTrue)
+			})
+		})
+
+		Convey("When I call #MatchActivity with a NON-matching #Activity defined", func() {
+			filter.Activity = []string{project.Activity + "blah"}
+			match = filter.MatchActivity(project)
+
+			Convey("Then I expect NO match", func() {
+				So(match, ShouldBeFalse)
+			})
+		})
+
 		// #MatchWithin --------------------------------------------------------
 
 		Convey("When I call #MatchWithin with no #Within defined", func() {
@@ -120,6 +148,15 @@ func TestProjectCriteria(t *testing.T) {
 
 		Convey("When I call #Match with a NON-matching name", func() {
 			filter.Name = regexp.MustCompile(`this-wont-match`)
+			match = filter.Match(project)
+
+			Convey("Then I expect NO match", func() {
+				So(match, ShouldBeFalse)
+			})
+		})
+
+		Convey("When I call #Match with a NON-matching activity", func() {
+			filter.Activity = []string{"this-wont-match"}
 			match = filter.Match(project)
 
 			Convey("Then I expect NO match", func() {

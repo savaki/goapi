@@ -8,9 +8,10 @@ import (
 )
 
 type ProjectFilter struct {
-	Within time.Duration
-	Status []string
-	Name   *regexp.Regexp
+	Within   time.Duration
+	Activity []string
+	Status   []string
+	Name     *regexp.Regexp
 }
 
 func (filter ProjectFilter) MatchWithin(project Project) bool {
@@ -24,6 +25,20 @@ func (filter ProjectFilter) MatchWithin(project Project) bool {
 	}
 
 	return buildTime.Add(filter.Within).Before(time.Now()) == false
+}
+
+func (filter ProjectFilter) MatchActivity(project Project) bool {
+	if filter.Activity == nil {
+		return true
+	}
+
+	for _, activity := range filter.Activity {
+		if activity == project.Activity {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (filter ProjectFilter) MatchStatus(project Project) bool {
@@ -58,6 +73,10 @@ func (filter ProjectFilter) Match(project Project) bool {
 	}
 
 	if !filter.MatchName(project) {
+		return false
+	}
+
+	if !filter.MatchActivity(project) {
 		return false
 	}
 
