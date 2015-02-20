@@ -17,10 +17,25 @@ var flags = []cli.Flag{
 }
 
 var (
-	flagPipelineName = cli.StringFlag{"pipeline", "", "the name of the pipeline", "GOCD_PIPELINE"}
-	flagStageName    = cli.StringFlag{"stage", "", "the name of the stage", "GOCD_STAGE"}
-	flagAgentUuid    = cli.StringFlag{"agent-uuid", "", "the uuid of the agent", "GOCD_AGENT_UUID"}
-	flagOffset       = cli.IntFlag{"offset", 0, "the offset for pagination", "GOCD_OFFSET"}
+	flagPipelineName    = cli.StringFlag{"pipeline", "", "the name of the pipeline", "GOCD_PIPELINE"}
+	flagPipelineCounter = cli.StringFlag{"pipeline-counter", "", "the counter for the pipeline", "GOCD_PIPELINE_COUNTER"}
+	flagStageName       = cli.StringFlag{"stage", "", "the name of the stage", "GOCD_STAGE"}
+	flagStageCounter    = cli.StringFlag{"stage-counter", "", "the counter for the stage", "GOCD_STAGE_COUNTER"}
+	flagJobName         = cli.StringFlag{"job", "", "the name of the job", "GOCD_JOB"}
+	flagAgentUuid       = cli.StringFlag{"agent-uuid", "", "the uuid of the agent", "GOCD_AGENT_UUID"}
+	flagOffset          = cli.IntFlag{"offset", 0, "the offset for pagination", "GOCD_OFFSET"}
+	flagDownload        = cli.StringFlag{"download", "file", "what format to download => zip or file", "GOCD_DOWNLOAD"}
+	flagPath            = cli.StringFlag{"path", "", "the path of the artifact to retrieve", "GOCD_PATH"}
+)
+
+var (
+	flagBuildIdentifier = []cli.Flag{
+		flagPipelineName,
+		flagPipelineCounter,
+		flagStageName,
+		flagStageCounter,
+		flagJobName,
+	}
 )
 
 func main() {
@@ -30,10 +45,12 @@ func main() {
 	app.Author = "Matt"
 	app.Commands = []cli.Command{
 		agent,
+		artifact,
+		build,
+		job,
 		pipeline,
 		pipelineGroups,
 		stage,
-		build,
 	}
 	app.Run(os.Args)
 }
@@ -52,6 +69,16 @@ func assert(err error) {
 	}
 }
 
+func buildIdentifier(c *cli.Context) goapi.BuildIdentifier {
+	return goapi.BuildIdentifier{
+		PipelineName:    c.String(flagPipelineName.Name),
+		PipelineCounter: c.Int(flagPipelineCounter.Name),
+		StageName:       c.String(flagStageName.Name),
+		StageCounter:    c.Int(flagStageCounter.Name),
+		JobName:         c.String(flagJobName.Name),
+	}
+}
+
 func marshalIndent(v interface{}) string {
 	data, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
@@ -61,5 +88,13 @@ func marshalIndent(v interface{}) string {
 }
 
 func print(v interface{}) {
-	fmt.Println(marshalIndent(v))
+	if v == nil {
+		fmt.Println("{}")
+	} else {
+		text := marshalIndent(v)
+		if text == "null" {
+			text = "[]"
+		}
+		fmt.Println(text)
+	}
 }

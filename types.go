@@ -1,12 +1,18 @@
 package goapi
 
 import (
+	"fmt"
+	"io"
 	"strings"
 	"time"
 )
 
 const (
 	TimeFormat = "2006-01-02T15:04:05"
+)
+
+var (
+	ErrNoSuchArtifact = fmt.Errorf("no such artifact")
 )
 
 type Agent struct {
@@ -105,6 +111,35 @@ type Project struct {
 }
 
 type Artifact struct {
+	Name  string    `json:"name"`
+	Url   string    `json:"url"`
+	Type  string    `json:"type"`
+	Files Artifacts `json:"files,omitempty"`
+}
+
+type Artifacts []Artifact
+
+func (a Artifacts) Find(path string) (Artifact, error) {
+	if a == nil {
+		return Artifact{}, ErrNoSuchArtifact
+	}
+
+	segments := strings.Split(path, "/")
+	name := segments[0]
+
+	for _, artifact := range a {
+		if artifact.Name == name {
+			if len(segments) == 1 {
+				return artifact, nil
+			} else if artifact.Files != nil {
+				return artifact.Files.Find(strings.Join(segments[1:], "/"))
+			} else {
+				return Artifact{}, ErrNoSuchArtifact
+			}
+		}
+	}
+
+	return Artifact{}, ErrNoSuchArtifact
 }
 
 func (p Project) LastBuildTime() (time.Time, error) {
@@ -143,3 +178,15 @@ func (s ScheduledJob) Trim() ScheduledJob {
 
 	return s
 }
+
+// --------------------------------------------------------
+
+type BuildIdentifier struct {
+	PipelineName    string
+	PipelineCounter int
+	StageName       string
+	StageCounter    int
+	JobName         string
+}
+
+type Visitor func(string, io.Reader) error

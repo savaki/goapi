@@ -1,8 +1,8 @@
 package goapi
 
 import (
+	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -10,7 +10,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestCCTray(t *testing.T) {
+func TestTypes(t *testing.T) {
 	Convey("Given a cctray xml content", t, func() {
 		content := `<?xml version="1.0" encoding="utf-8"?>
 <Projects>
@@ -97,7 +97,6 @@ func TestCCTray(t *testing.T) {
 		})
 
 		Convey("And I expect the jobs to be parsed correctly", func() {
-			fmt.Println(jobs)
 			So(len(jobs.Jobs), ShouldBeGreaterThan, 0)
 
 			var job ScheduledJob
@@ -119,6 +118,132 @@ func TestCCTray(t *testing.T) {
 			So(job.EnvironmentVariables[2].Value, ShouldEqual, "/var/lib/go-agent")
 
 			So(job.Resources, ShouldResemble, []string{"autodeploy"})
+		})
+	})
+
+	Convey("Given a list of artifacts", t, func() {
+		content := `[
+  {
+    "name": "cruise-output",
+    "url": "http://192.168.99.101:8153/go/files/First-Pipeline/10/defaultStage/1/defaultJob/cruise-output",
+    "type": "folder",
+    "files": [
+      {
+        "name": "console.log",
+        "url": "http://192.168.99.101:8153/go/files/First-Pipeline/10/defaultStage/1/defaultJob/cruise-output/console.log",
+        "type": "file"
+      },
+      {
+        "name": "md5.checksum",
+        "url": "http://192.168.99.101:8153/go/files/First-Pipeline/10/defaultStage/1/defaultJob/cruise-output/md5.checksum",
+        "type": "file"
+      }
+    ]
+  },
+  {
+    "name": "sample.txt",
+    "url": "http://192.168.99.101:8153/go/files/First-Pipeline/10/defaultStage/1/defaultJob/sample.txt",
+    "type": "folder",
+    "files": [
+      {
+        "name": "sample.txt",
+        "url": "http://192.168.99.101:8153/go/files/First-Pipeline/10/defaultStage/1/defaultJob/sample.txt/sample.txt",
+        "type": "file"
+      }
+    ]
+  }
+]`
+
+		artifacts := []Artifact{}
+		err := json.NewDecoder(strings.NewReader(content)).Decode(&artifacts)
+
+		Convey("Then I expect no errors", func() {
+			So(err, ShouldBeNil)
+		})
+
+		Convey("And I expect the artifacts to be assigned", func() {
+			So(artifacts, ShouldNotBeNil)
+			So(len(artifacts), ShouldEqual, 2)
+
+			artifact := artifacts[0]
+			So(artifact.Name, ShouldEqual, "cruise-output")
+			So(artifact.Url, ShouldEqual, "http://192.168.99.101:8153/go/files/First-Pipeline/10/defaultStage/1/defaultJob/cruise-output")
+			So(artifact.Type, ShouldEqual, "folder")
+			So(artifact.Files, ShouldNotBeNil)
+			So(len(artifact.Files), ShouldEqual, 2)
+
+			// file 1
+			file := artifact.Files[0]
+			So(file.Name, ShouldEqual, "console.log")
+			So(file.Url, ShouldEqual, "http://192.168.99.101:8153/go/files/First-Pipeline/10/defaultStage/1/defaultJob/cruise-output/console.log")
+			So(file.Type, ShouldEqual, "file")
+		})
+	})
+
+	Convey("Test Artifacts#Find", t, func() {
+		artifacts := Artifacts{
+			{
+				Name: "file1.txt",
+				Url:  "http://blah",
+				Type: "file",
+			},
+			{
+				Name: "file2.txt",
+				Url:  "http://blah",
+				Type: "file",
+			},
+			{
+				Name: "dir",
+				Type: "folder",
+				Files: []Artifact{
+					{
+						Name: "file3.txt",
+						Url:  "http://blah",
+						Type: "file",
+					},
+					{
+						Name: "file4.txt",
+						Url:  "http://blah",
+						Type: "file",
+					},
+				},
+			},
+		}
+
+		Convey("When I call #Find on a file", func() {
+			var artifact Artifact
+			var err error
+
+			artifact, err = artifacts.Find("file1.txt")
+
+			Convey("Then I expect to find the file", func() {
+				So(err, ShouldBeNil)
+				So(artifact.Name, ShouldEqual, "file1.txt")
+			})
+		})
+
+		Convey("When I call #Find on a dir", func() {
+			var artifact Artifact
+			var err error
+
+			artifact, err = artifacts.Find("dir")
+
+			Convey("Then I expect to find the file", func() {
+				So(err, ShouldBeNil)
+				So(artifact.Name, ShouldEqual, "dir")
+			})
+		})
+
+		Convey("When I call #Find on a subfile", func() {
+			var artifact Artifact
+			var err error
+
+			artifact, err = artifacts.Find("dir/file3.txt")
+
+			Convey("Then I expect to find the file", func() {
+				So(err, ShouldBeNil)
+				So(artifact.Name, ShouldEqual, "file3.txt")
+			})
 		})
 	})
 }

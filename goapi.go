@@ -2,6 +2,7 @@ package goapi
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -18,6 +19,7 @@ func defaultContext() context.Context {
 type Client struct {
 	codebase string
 	api      httpctx.HttpClient
+	download func(url string) (io.ReadCloser, error)
 }
 
 func New(codebase string) *Client {
@@ -37,6 +39,7 @@ func WithAuth(c *Client, username, password string) *Client {
 			return req
 		}
 		c.api = httpctx.WithAuthFunc(authFunc)
+		c.download = downloadFunc(authFunc)
 	}
 	return c
 }
@@ -49,4 +52,60 @@ func (c *Client) pathTo(format string, args ...interface{}) string {
 func (c *Client) rawPathTo(format string, args ...interface{}) string {
 	path := fmt.Sprintf(format, args...)
 	return c.codebase + path
+}
+
+// ------------------------------------------------------------------
+
+func (c *Client) walkFile(path string, artifact Artifact, visitor Visitor) error {
+	r, err := c.download(artifact.Url)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	return visitor(path, r)
+}
+
+func (c *Client) walkFolders(path string, artifacts Artifacts, visitor Visitor) error {
+	var err error
+
+	for _, artifact := range artifacts {
+		switch artifact.Type {
+		case "file":
+			err = c.walkFile(path+artifact.Name, artifact, visitor)
+		default:
+			err = c.walkFolders(path+artifact.Name+"/", artifact.Files, visitor)
+		}
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *Client) Walk(artifacts Artifacts, visitor Visitor) error {
+	return c.walkFolders("", artifacts, visitor)
+}
+
+// ------------------------------------------------------------------
+
+func downloadFunc(authFunc httpctx.AuthFunc) func(url string) (io.ReadCloser, error) {
+	return func(url string) (io.ReadCloser, error) {
+		// construct the request
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return nil, err
+		}
+		req = authFunc(req)
+
+		// retrieve the content
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		return resp.Body, nil
+	}
 }
