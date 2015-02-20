@@ -44,7 +44,7 @@ func TestWalk(t *testing.T) {
 		Convey("When I #Walk the artifacts", func() {
 			visitor := &MockVisitor{}
 			client := &Client{
-				download: MockDownload{}.HandlerFunc,
+				Download: MockDownload{}.HandlerFunc,
 			}
 
 			err := client.Walk(artifacts, visitor.HandlerFunc)

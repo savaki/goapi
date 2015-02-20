@@ -19,7 +19,7 @@ func defaultContext() context.Context {
 type Client struct {
 	codebase string
 	api      httpctx.HttpClient
-	download func(url string) (io.ReadCloser, error)
+	Download func(url string) (io.ReadCloser, error)
 }
 
 func New(codebase string) *Client {
@@ -29,6 +29,7 @@ func New(codebase string) *Client {
 	return &Client{
 		codebase: codebase,
 		api:      httpctx.NewClient(),
+		Download: downloadFunc(nil),
 	}
 }
 
@@ -39,7 +40,7 @@ func WithAuth(c *Client, username, password string) *Client {
 			return req
 		}
 		c.api = httpctx.WithAuthFunc(authFunc)
-		c.download = downloadFunc(authFunc)
+		c.Download = downloadFunc(authFunc)
 	}
 	return c
 }
@@ -57,7 +58,7 @@ func (c *Client) rawPathTo(format string, args ...interface{}) string {
 // ------------------------------------------------------------------
 
 func (c *Client) walkFile(path string, artifact Artifact, visitor Visitor) error {
-	r, err := c.download(artifact.Url)
+	r, err := c.Download(artifact.Url)
 	if err != nil {
 		return err
 	}
@@ -98,7 +99,9 @@ func downloadFunc(authFunc httpctx.AuthFunc) func(url string) (io.ReadCloser, er
 		if err != nil {
 			return nil, err
 		}
-		req = authFunc(req)
+		if authFunc != nil {
+			req = authFunc(req)
+		}
 
 		// retrieve the content
 		resp, err := http.DefaultClient.Do(req)
