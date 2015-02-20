@@ -61,7 +61,7 @@ func (filter ProjectFilter) matchName(project Project) bool {
 	return filter.Name.MatchString(project.Name)
 }
 
-func (filter ProjectFilter) Match(project Project) bool {
+func (filter ProjectFilter) match(project Project) bool {
 	if !filter.matchWithin(project) {
 		return false
 	}

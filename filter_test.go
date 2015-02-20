@@ -137,8 +137,8 @@ func TestProjectFilter(t *testing.T) {
 
 		// #Match ------------------------------------------------------------
 
-		Convey("When I call #Match with the default filter", func() {
-			match = filter.Match(project)
+		Convey("When I call #match with the default filter", func() {
+			match = filter.match(project)
 
 			Convey("Then I expect a match", func() {
 				So(match, ShouldBeTrue)
@@ -147,7 +147,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #Match with a NON-matching name", func() {
 			filter.Name = regexp.MustCompile(`this-wont-match`)
-			match = filter.Match(project)
+			match = filter.match(project)
 
 			Convey("Then I expect NO match", func() {
 				So(match, ShouldBeFalse)
@@ -156,7 +156,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #Match with a NON-matching activity", func() {
 			filter.Activity = []string{"this-wont-match"}
-			match = filter.Match(project)
+			match = filter.match(project)
 
 			Convey("Then I expect NO match", func() {
 				So(match, ShouldBeFalse)
@@ -165,7 +165,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #Match with a NON-matching status", func() {
 			filter.Status = []string{"this-wont-match"}
-			match = filter.Match(project)
+			match = filter.match(project)
 
 			Convey("Then I expect NO match", func() {
 				So(match, ShouldBeFalse)
@@ -174,7 +174,7 @@ func TestProjectFilter(t *testing.T) {
 
 		Convey("When I call #Match with a NON-matching within", func() {
 			filter.Within = time.Second
-			match = filter.Match(project)
+			match = filter.match(project)
 
 			Convey("Then I expect NO match", func() {
 				So(match, ShouldBeFalse)
