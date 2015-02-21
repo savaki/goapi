@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -22,6 +23,24 @@ type Client struct {
 	api      httpctx.HttpClient
 	Download func(url string) (io.ReadCloser, error)
 	log      func(format string, args ...interface{})
+}
+
+func FromEnv() (*Client, error) {
+	// attempt to instantiate a client
+	codebase := os.Getenv("GO_CODEBASE")
+	if codebase == "" {
+		return nil, fmt.Errorf("ERROR - GO_CODEBASE environment variable not defined")
+	}
+	client := New(codebase)
+
+	// associate a username and password if provided
+	username := os.Getenv("GO_USERNAME")
+	password := os.Getenv("GO_PASSWORD")
+	if username != "" && password != "" {
+		client = WithAuth(client, username, password)
+	}
+
+	return client, nil
 }
 
 func New(codebase string) *Client {
