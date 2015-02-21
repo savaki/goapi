@@ -211,7 +211,7 @@ func TestTypes(t *testing.T) {
 		}
 
 		Convey("When I call #Find on a file", func() {
-			var artifact Artifact
+			var artifact *Artifact
 			var err error
 
 			artifact, err = artifacts.Find("file1.txt")
@@ -223,7 +223,7 @@ func TestTypes(t *testing.T) {
 		})
 
 		Convey("When I call #Find on a dir", func() {
-			var artifact Artifact
+			var artifact *Artifact
 			var err error
 
 			artifact, err = artifacts.Find("dir")
@@ -235,7 +235,7 @@ func TestTypes(t *testing.T) {
 		})
 
 		Convey("When I call #Find on a subfile", func() {
-			var artifact Artifact
+			var artifact *Artifact
 			var err error
 
 			artifact, err = artifacts.Find("dir/file3.txt")

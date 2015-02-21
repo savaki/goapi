@@ -44,6 +44,7 @@ func TestWalk(t *testing.T) {
 		Convey("When I #Walk the artifacts", func() {
 			visitor := &MockVisitor{}
 			client := &Client{
+				log:      noOpLog,
 				Download: MockDownload{}.HandlerFunc,
 			}
 
@@ -72,6 +73,9 @@ type MockVisitor struct {
 }
 
 func (m *MockVisitor) HandlerFunc(path string, r io.Reader) error {
+	if m.Paths == nil {
+		m.Paths = []string{}
+	}
 	m.Paths = append(m.Paths, path)
 	return m.Err
 }

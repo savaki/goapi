@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+var Filter = struct {
+	Failed ProjectFilter
+}{
+	Failed: ProjectFilter{Status: []string{"Failed"}},
+}
+
 type ProjectFilter struct {
 	Within   time.Duration
 	Activity []string
