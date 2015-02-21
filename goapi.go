@@ -29,7 +29,7 @@ func FromEnv() (*Client, error) {
 	// attempt to instantiate a client
 	codebase := os.Getenv("GO_CODEBASE")
 	if codebase == "" {
-		return nil, fmt.Errorf("ERROR - GO_CODEBASE environment variable not defined")
+		return nil, fmt.Errorf("GO_CODEBASE environment variable not defined")
 	}
 	client := New(codebase)
 
