@@ -3,6 +3,7 @@ package goapi
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -20,6 +21,7 @@ type Client struct {
 	codebase string
 	api      httpctx.HttpClient
 	Download func(url string) (io.ReadCloser, error)
+	log      func(format string, args ...interface{})
 }
 
 func New(codebase string) *Client {
@@ -30,6 +32,7 @@ func New(codebase string) *Client {
 		codebase: codebase,
 		api:      httpctx.NewClient(),
 		Download: downloadFunc(nil),
+		log:      noOpLog,
 	}
 }
 
@@ -45,6 +48,15 @@ func WithAuth(c *Client, username, password string) *Client {
 	return c
 }
 
+func WithLog(c *Client, log func(string, ...interface{})) *Client {
+	c.log = log
+	return c
+}
+
+func Verbose(c *Client) *Client {
+	return WithLog(c, log.Printf)
+}
+
 func (c *Client) pathTo(format string, args ...interface{}) string {
 	path := fmt.Sprintf(format, args...)
 	return c.codebase + "/go/api" + path
@@ -58,6 +70,8 @@ func (c *Client) rawPathTo(format string, args ...interface{}) string {
 // ------------------------------------------------------------------
 
 func (c *Client) walkFile(path string, artifact Artifact, visitor Visitor) error {
+	c.log("downloading %s => %s\n", path, artifact.Url)
+
 	r, err := c.Download(artifact.Url)
 	if err != nil {
 		return err
@@ -111,4 +125,7 @@ func downloadFunc(authFunc httpctx.AuthFunc) func(url string) (io.ReadCloser, er
 
 		return resp.Body, nil
 	}
+}
+
+func noOpLog(format string, args ...interface{}) {
 }

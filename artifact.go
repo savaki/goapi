@@ -2,8 +2,9 @@ package goapi
 
 import "fmt"
 
-func (c *Client) ArtifactList(b BuildIdentifier) ([]Artifact, error) {
+func (c *Client) ArtifactList(b BuildIdentifier) (Artifacts, error) {
 	path := c.rawPathTo("/go/files/%s/%d/%s/%d/%s.json", b.PipelineName, b.PipelineCounter, b.StageName, b.StageCounter, b.JobName)
+	c.log("downloading artifact list from %s\n", path)
 
 	artifacts := []Artifact{}
 	err := c.api.Get(defaultContext(), path, nil, &artifacts)

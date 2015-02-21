@@ -14,6 +14,7 @@ var flags = []cli.Flag{
 	cli.StringFlag{"username", "", "Go CD username", "GOCD_USERNAME"},
 	cli.StringFlag{"password", "", "Go CD password", "GOCD_PASSWORD"},
 	cli.StringFlag{"url", "http://localhost:8153", "Go CD server codebase", "GOCD_URL"},
+	cli.BoolFlag{"verbose", "enable additional debugging", "GOCD_VERBOSE"},
 }
 
 var (
@@ -26,6 +27,7 @@ var (
 	flagOffset          = cli.IntFlag{"offset", 0, "the offset for pagination", "GOCD_OFFSET"}
 	flagDownload        = cli.StringFlag{"download", "file", "what format to download => zip or file", "GOCD_DOWNLOAD"}
 	flagPath            = cli.StringFlag{"path", "", "the path of the artifact to retrieve", "GOCD_PATH"}
+	flagOutput          = cli.StringFlag{"output", ".", "the directory to save results to", "GOCD_OUTPUT"}
 )
 
 var (
@@ -37,6 +39,8 @@ var (
 		flagJobName,
 	}
 )
+
+var verbose bool
 
 func main() {
 	app := cli.NewApp()
@@ -60,12 +64,23 @@ func newClient(c *cli.Context) *goapi.Client {
 	password := c.String("password")
 	url := c.String("url")
 
-	return goapi.WithAuth(goapi.New(url), username, password)
+	client := goapi.WithAuth(goapi.New(url), username, password)
+	verbose = c.Bool("verbose")
+	if verbose {
+		client = goapi.WithLog(client, log.Printf)
+	}
+	return client
 }
 
 func assert(err error) {
 	if err != nil {
 		log.Fatalln(err)
+	}
+}
+
+func debug(format string, args ...interface{}) {
+	if verbose {
+		log.Printf(format, args...)
 	}
 }
 

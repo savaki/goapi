@@ -119,9 +119,9 @@ type Artifact struct {
 
 type Artifacts []Artifact
 
-func (a Artifacts) Find(path string) (Artifact, error) {
+func (a Artifacts) Find(path string) (*Artifact, error) {
 	if a == nil {
-		return Artifact{}, ErrNoSuchArtifact
+		return nil, ErrNoSuchArtifact
 	}
 
 	segments := strings.Split(path, "/")
@@ -130,16 +130,16 @@ func (a Artifacts) Find(path string) (Artifact, error) {
 	for _, artifact := range a {
 		if artifact.Name == name {
 			if len(segments) == 1 {
-				return artifact, nil
+				return &artifact, nil
 			} else if artifact.Files != nil {
 				return artifact.Files.Find(strings.Join(segments[1:], "/"))
 			} else {
-				return Artifact{}, ErrNoSuchArtifact
+				return nil, ErrNoSuchArtifact
 			}
 		}
 	}
 
-	return Artifact{}, ErrNoSuchArtifact
+	return nil, ErrNoSuchArtifact
 }
 
 func (p Project) LastBuildTime() (time.Time, error) {
