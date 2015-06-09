@@ -1,2 +1,8 @@
 # ignore generated files
 /gocd/gocd
+
+# ignore intellij files
+/.idea
+/*.iml
+/*.ipr
+/*.iws
